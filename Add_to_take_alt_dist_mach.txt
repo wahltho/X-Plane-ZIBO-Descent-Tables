@@ -1,0 +1,4 @@
+	local variant_test_ok, variant_test_dist = pcall(B738_variant_test_take_alt_dist_mach, x_idx_alt, x_spd_alt, x_spd_wnd_alt)
+	if variant_test_ok and variant_test_dist ~= nil then
+		return variant_test_dist
+	end

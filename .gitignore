@@ -1,0 +1,6 @@
+dist/*.zip
+dist/*.zip.sha256
+build/
+dist/native/
+__pycache__/
+*.py[cod]
