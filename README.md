@@ -127,7 +127,3 @@ If the custom behavior does not appear to activate:
 
 If the custom calculation cannot be used for a specific situation, the hook
 returns `nil` and the original Lua calculation continues.
-
-## Credits
-
-Implementation and table preparation by Thomas W. (wahltho).
