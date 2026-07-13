@@ -1,3 +1,6 @@
+-- yal-package-id|x-plane-zibo-vnav-descent-tables
+-- yal-package-version|v0.2.0
+-- yal-aircraft-family|zibo_upstream
 -- BEGIN UPSTREAM VARIANT TEST: Zibo 737-800X VNAV descent tables
 -- Zibo-only installer payload.
 -- Goal: source-backed clean descent geometry for the Zibo 737-800X using the same data package as the C++ port.

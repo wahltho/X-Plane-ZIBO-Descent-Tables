@@ -24,7 +24,9 @@ jobs:
           zip -X -j dist/zibo-vnav-descent-installer.zip \
             README.md \
             z_Install.py \
+            yal-package-manifest.txt \
             B738.a_fms_zibo_tables.lua \
+            Add_dofile.txt \
             Add_to_take_alt_dist.txt \
             Add_to_take_alt_dist_mach.txt
           sha256sum dist/zibo-vnav-descent-installer.zip > dist/zibo-vnav-descent-installer.zip.sha256
@@ -38,6 +40,11 @@ jobs:
           path: |
             dist/zibo-vnav-descent-installer.zip
             dist/zibo-vnav-descent-installer.zip.sha256
+            yal-package-manifest.txt
+            B738.a_fms_zibo_tables.lua
+            Add_dofile.txt
+            Add_to_take_alt_dist.txt
+            Add_to_take_alt_dist_mach.txt
           if-no-files-found: error
 
       - name: Attach ZIP to GitHub release
@@ -53,4 +60,9 @@ jobs:
           gh release upload "$tag" \
             dist/zibo-vnav-descent-installer.zip \
             dist/zibo-vnav-descent-installer.zip.sha256 \
+            yal-package-manifest.txt \
+            B738.a_fms_zibo_tables.lua \
+            Add_dofile.txt \
+            Add_to_take_alt_dist.txt \
+            Add_to_take_alt_dist_mach.txt \
             --clobber

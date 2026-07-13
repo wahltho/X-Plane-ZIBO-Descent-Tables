@@ -1,0 +1,5 @@
+-- BEGIN ZIBO_VNAV_DESCENT_TABLES DOFILE
+-- yal-package-id|x-plane-zibo-vnav-descent-tables
+-- yal-package-version|v0.2.0
+dofile("B738.a_fms_zibo_tables.lua")
+-- END ZIBO_VNAV_DESCENT_TABLES DOFILE

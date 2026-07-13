@@ -49,8 +49,11 @@ datarefs, or failed calculations also fall back to the original Lua behavior.
 This repository contains:
 
 - `B738.a_fms_zibo_tables.lua`: the custom Zibo 737-800X descent table model.
+- `Add_dofile.txt`: marked `dofile()` fragment for loading the table file.
 - `Add_to_take_alt_dist.txt`: hook block for `take_alt_dist()`.
 - `Add_to_take_alt_dist_mach.txt`: hook block for `take_alt_dist_mach()`.
+- `yal-package-manifest.txt`: machine-readable package manifest for external
+  tools such as YAL.
 - `z_Install.py`: a Python installer that modifies `B738.a_fms.lua`, preserves
   the file's LF/CRLF line endings, creates a backup before modification, and
   avoids duplicate hook insertion.
@@ -68,8 +71,10 @@ This repository contains:
 2. Move these files into the Zibo `plugins/xlua/scripts/B738.a_fms` folder:
 
    - `B738.a_fms_zibo_tables.lua`
+   - `Add_dofile.txt`
    - `Add_to_take_alt_dist.txt`
    - `Add_to_take_alt_dist_mach.txt`
+   - `yal-package-manifest.txt`
    - `z_Install.py`
 
 3. From a terminal or console in the `B738.a_fms` folder, run:
@@ -81,13 +86,14 @@ This repository contains:
    On Windows, use `py z_Install.py` or `python z_Install.py` if `python3` is
    not available.
 
-4. The installer creates `B738.a_fms.backup` if no backup exists yet, inserts:
+4. The installer creates `B738.a_fms.backup` if no backup exists yet, inserts
+   the marked `dofile` fragment from `Add_dofile.txt` below:
 
    ```lua
-   dofile("B738.a_fms_zibo_tables.lua")
+   jit.off()
    ```
 
-   and adds the two VNAV descent hook blocks below:
+   and adds the two marked VNAV descent hook blocks below:
 
    - `function take_alt_dist(x_idx_alt, x_spd_alt, x_spd_wnd_alt, x_flap)`
    - `function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)`
@@ -97,11 +103,7 @@ This repository contains:
 Manual editing is only the fallback if Python is not available. Make a backup of
 `B738.a_fms.lua` before you begin.
 
-1. Add this line below `jit.off()`:
-
-   ```lua
-   dofile("B738.a_fms_zibo_tables.lua")
-   ```
+1. Add all lines from `Add_dofile.txt` directly below `jit.off()`.
 
 2. Add all lines from `Add_to_take_alt_dist.txt` directly below:
 
@@ -114,6 +116,45 @@ Manual editing is only the fallback if Python is not available. Make a backup of
    ```lua
    function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)
    ```
+
+## YAL / External Tool Interface
+
+Version `v0.2.0` is the first package layout prepared for external installers.
+The stable package ID is:
+
+```text
+x-plane-zibo-vnav-descent-tables
+```
+
+The aircraft family is:
+
+```text
+zibo_upstream
+```
+
+External tools should read `yal-package-manifest.txt` instead of scraping the
+README. The manifest is pipe-delimited, includes the release tag, exact target
+path, patch anchors, stable BEGIN/END markers, and the size plus SHA-256 of
+the four payloads:
+
+- `B738.a_fms_zibo_tables.lua`
+- `Add_dofile.txt`
+- `Add_to_take_alt_dist.txt`
+- `Add_to_take_alt_dist_mach.txt`
+
+The marker names are intentionally version-independent. The package version is
+stored inside the marked blocks and as machine-readable comments in the table
+file. This allows tools to update an installed package without binding to a
+hash of the full upstream `B738.a_fms.lua`.
+
+The installer also migrates unmarked `v0.1.0` installations:
+
+- a bare `dofile("B738.a_fms_zibo_tables.lua")` line is replaced by the marked
+  dofile block;
+- the old unmarked KIAS hook is replaced by the marked KIAS block;
+- the old unmarked Mach hook is replaced by the marked Mach block.
+
+The migration is designed to avoid duplicate hooks.
 
 ## Troubleshooting
 
