@@ -1,14 +1,14 @@
-schema|yal-package-manifest|1
+schema|package-manifest|1
 package|id|x-plane-zibo-vnav-descent-tables
 package|version|v0.2.0
 package|release_tag|v0.2.0
 aircraft|family|zibo_upstream
 repository|url|https://github.com/wahltho/X-Plane-ZIBO-Descent-Tables
 target|relative_path|plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua
-payload|table|B738.a_fms_zibo_tables.lua|size|14131|sha256|d5240f9058e246666f1762428e66580ac9c66e8cddd4d421fe7c22c06c28fb73
-payload|dofile|Add_dofile.txt|size|198|sha256|b97e4ebc7e89c1bf85641151056c2e45372d0a9d033bb9a841b9ae34ba2de795
-payload|kias|Add_to_take_alt_dist.txt|size|375|sha256|d4db9b8c0eca4cf680adc5bc8f75d0a7d3efce7439f74c6b7373a944e34c6bbe
-payload|mach|Add_to_take_alt_dist_mach.txt|size|372|sha256|e2507fcb639819ad2f62f1aacf8122af5ba85a0e6acbd73434d38f1b2178d12b
+payload|table|B738.a_fms_zibo_tables.lua|size|14119|sha256|c97042b2384ab28545c76c5ec8db631c68265895c06fab7c1bff8327d8668b37
+payload|dofile|Add_dofile.txt|size|190|sha256|948bdc32b89f7c52b56f74c65e462b52ec201046120be5457eac1750d02a26f4
+payload|kias|Add_to_take_alt_dist.txt|size|367|sha256|a3653fb8c66078956248053989704c8b1886c069ba2073a46e6e1c875358acf7
+payload|mach|Add_to_take_alt_dist_mach.txt|size|364|sha256|48d572072db5efe3c93af10fff73404a5f9f37588991ab75884f8c5ec7bf15fb
 anchor|dofile|jit.off()
 anchor|kias|function take_alt_dist(x_idx_alt, x_spd_alt, x_spd_wnd_alt, x_flap)
 anchor|mach|function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)

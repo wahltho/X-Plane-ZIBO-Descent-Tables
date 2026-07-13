@@ -52,8 +52,7 @@ This repository contains:
 - `Add_dofile.txt`: marked `dofile()` fragment for loading the table file.
 - `Add_to_take_alt_dist.txt`: hook block for `take_alt_dist()`.
 - `Add_to_take_alt_dist_mach.txt`: hook block for `take_alt_dist_mach()`.
-- `yal-package-manifest.txt`: machine-readable package manifest for external
-  tools such as YAL.
+- `package-manifest.txt`: machine-readable package metadata for external tools.
 - `z_Install.py`: a Python installer that modifies `B738.a_fms.lua`, preserves
   the file's LF/CRLF line endings, creates a backup before modification, and
   avoids duplicate hook insertion.
@@ -74,7 +73,7 @@ This repository contains:
    - `Add_dofile.txt`
    - `Add_to_take_alt_dist.txt`
    - `Add_to_take_alt_dist_mach.txt`
-   - `yal-package-manifest.txt`
+   - `package-manifest.txt`
    - `z_Install.py`
 
 3. From a terminal or console in the `B738.a_fms` folder, run:
@@ -117,35 +116,24 @@ Manual editing is only the fallback if Python is not available. Make a backup of
    function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)
    ```
 
-## YAL / External Tool Interface
+## Machine-Readable Package Metadata
 
-Version `v0.2.0` is the first package layout prepared for external installers.
-The stable package ID is:
+This package includes `package-manifest.txt` for external tools that need to
+identify, verify or install the release payloads without relying on the
+human-readable README.
 
-```text
-x-plane-zibo-vnav-descent-tables
-```
-
-The aircraft family is:
-
-```text
-zibo_upstream
-```
-
-External tools should read `yal-package-manifest.txt` instead of scraping the
-README. The manifest is pipe-delimited, includes the release tag, exact target
-path, patch anchors, stable BEGIN/END markers, and the size plus SHA-256 of
-the four payloads:
+The manifest lists the package ID, package version, release tag, aircraft
+family, repository URL, target Lua path, payload filenames, file sizes,
+SHA-256 hashes, patch anchors, stable block markers and legacy hook signatures.
 
 - `B738.a_fms_zibo_tables.lua`
 - `Add_dofile.txt`
 - `Add_to_take_alt_dist.txt`
 - `Add_to_take_alt_dist_mach.txt`
 
-The marker names are intentionally version-independent. The package version is
-stored inside the marked blocks and as machine-readable comments in the table
-file. This allows tools to update an installed package without binding to a
-hash of the full upstream `B738.a_fms.lua`.
+The manifest does not bind the package to a hash of the complete upstream
+`B738.a_fms.lua`, because that file can legitimately change with aircraft
+updates.
 
 The installer also migrates unmarked `v0.1.0` installations:
 

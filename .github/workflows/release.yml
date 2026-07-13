@@ -24,7 +24,7 @@ jobs:
           zip -X -j dist/zibo-vnav-descent-installer.zip \
             README.md \
             z_Install.py \
-            yal-package-manifest.txt \
+            package-manifest.txt \
             B738.a_fms_zibo_tables.lua \
             Add_dofile.txt \
             Add_to_take_alt_dist.txt \
@@ -40,7 +40,7 @@ jobs:
           path: |
             dist/zibo-vnav-descent-installer.zip
             dist/zibo-vnav-descent-installer.zip.sha256
-            yal-package-manifest.txt
+            package-manifest.txt
             B738.a_fms_zibo_tables.lua
             Add_dofile.txt
             Add_to_take_alt_dist.txt
@@ -60,7 +60,7 @@ jobs:
           gh release upload "$tag" \
             dist/zibo-vnav-descent-installer.zip \
             dist/zibo-vnav-descent-installer.zip.sha256 \
-            yal-package-manifest.txt \
+            package-manifest.txt \
             B738.a_fms_zibo_tables.lua \
             Add_dofile.txt \
             Add_to_take_alt_dist.txt \
