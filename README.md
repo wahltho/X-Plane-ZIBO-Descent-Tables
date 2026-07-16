@@ -122,11 +122,11 @@ This package includes `package-manifest.txt` for external tools that need to
 identify, verify or install the release payloads without relying on the
 human-readable README.
 
-The target external updater model is described in `UPDATE_MECHANISM.md`. It
-keeps the VNAV table package separately versioned from any updater application,
-uses GitHub Releases as the package source of truth, and preserves the rule
-that the user's local `B738.a_fms.lua` is patched locally rather than
-redistributed.
+The target updater model is described in `UPDATE_MECHANISM.md`. It allows YAL
+to implement the update algorithm itself, parallel to the separate LevelUp
+standalone installer. The VNAV table package remains separately versioned, uses
+GitHub Releases as the package source of truth, and preserves the rule that the
+user's local `B738.a_fms.lua` is patched locally rather than redistributed.
 
 The manifest lists the package ID, package version, release tag, aircraft
 family, repository URL, target Lua path, payload filenames, file sizes,

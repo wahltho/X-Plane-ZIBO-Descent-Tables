@@ -4,13 +4,16 @@ Last updated: 2026-07-16
 Repository: `https://github.com/wahltho/X-Plane-ZIBO-Descent-Tables`
 
 This document describes the target update model for the custom Zibo VNAV
-descent table package. It is intentionally aligned with the LevelUp VNAV table
-updater concept and the YAL runtime-update notes, but adapted to the Zibo
-package's actual patch contract.
+descent table package. The package can be consumed by YAL's own update engine,
+parallel to the separate LevelUp standalone installer. The two implementations
+can share the same conservative concepts -- manifests, hashes, staging,
+dry-run, backups and install-state classification -- while staying separate in
+ownership and release process.
 
 ## Goals
 
-- Keep the VNAV table package separately versioned from any installer app.
+- Keep the VNAV table package separately versioned from any installer or host
+  application.
 - Use authorized GitHub Releases as the package source of truth.
 - Do not use the `main` branch or auto-generated GitHub ZIP files as a stable
   update API.
@@ -82,35 +85,42 @@ The existing Python installer already implements the core patch behavior:
 - duplicate hook avoidance
 - first backup creation
 
-A future GUI/external updater should port that behavior into a reusable
-patch-core instead of shelling out to Python. End users should not need a
-Python installation.
+YAL's update engine should port that behavior into a reusable patch-core
+instead of shelling out to Python. End users should not need a Python
+installation.
 
 ## Version Ownership
 
-Keep two version layers separate:
+Keep the version layers separate:
 
-1. **Installer or updater app**
-   - own app version
-   - own app update mechanism
-   - VeloPack only if this becomes a standalone desktop app
-   - app release channels are not the same as VNAV package channels
+1. **YAL update engine**
+   - owned and shipped by YAL
+   - follows YAL's own plugin version and release channel
+   - implements manifest download, hash verification, staging, patching,
+     backup, repair and uninstall
+   - remains separate from the LevelUp standalone installer
 
 2. **Zibo VNAV content package**
    - own package version
    - own manifest
    - own payload hashes
    - own GitHub Release tags
-   - installed by the patch engine
+   - installed by YAL's patch engine when the user explicitly chooses it
 
-One installer app may support multiple content packages, for example:
+3. **LevelUp standalone installer**
+   - separate application and release process
+   - can use VeloPack for its own application updates
+   - may consume a LevelUp-specific VNAV content package
+   - does not own YAL's updater implementation
 
-- LevelUp 737NG VNAV descent tables
+YAL's update engine may support multiple package types over time, for example:
+
+- YAL runtime-safe plugin content updates
 - Zibo 737-800X custom VNAV descent tables
 
-The shared installer may reuse detection, manifest download, hash verification,
-backup, dry-run, install, repair and uninstall logic. The package manifests
-must still remain package-specific.
+The shared YAL implementation may reuse detection, manifest download, hash
+verification, backup, dry-run, install, repair and uninstall logic. The package
+manifests must still remain package-specific.
 
 ## Release Source
 
@@ -129,8 +139,8 @@ Do not depend on:
 - raw branch URLs
 - untagged repository state
 
-The installer should query release metadata, select the requested channel and
-download only release assets that match the package manifest.
+YAL's update engine should query release metadata, select the requested channel
+and download only release assets that match the package manifest.
 
 ## Manifest Direction
 
@@ -193,7 +203,7 @@ Migration rule:
 
 ## Target Detection
 
-The updater should not trust folder names alone.
+YAL's updater should not trust folder names alone.
 
 Accept a Zibo target only when structural signatures are present, such as:
 
@@ -322,11 +332,11 @@ Restore should:
 
 ## Relationship to YAL and LevelUp
 
-The same content-update pattern can support:
+The same content-update principles can support:
 
-- YAL runtime-safe plugin content updates
-- LevelUp 737NG VNAV descent table packages
-- Zibo 737-800X custom VNAV descent table packages
+- YAL's internal runtime-safe plugin updates
+- YAL-managed Zibo 737-800X custom VNAV descent table packages
+- the separate LevelUp standalone installer and its LevelUp VNAV package
 
 The shared rules are:
 
@@ -339,11 +349,12 @@ The shared rules are:
 
 The differences are:
 
-- YAL updates copy runtime-safe plugin files and block native binaries.
-- LevelUp and Zibo VNAV packages patch aircraft Lua files using anchors and
-  marked fragments.
-- A standalone desktop app may use VeloPack for its own app updates, but the
-  VNAV packages remain separately versioned content.
+- YAL implements its own update engine inside the plugin.
+- YAL's own updates copy runtime-safe plugin files and block native binaries.
+- YAL-managed Zibo VNAV package updates patch aircraft Lua files using anchors
+  and marked fragments.
+- LevelUp can implement the same package discipline through its separate
+  standalone VeloPack installer.
 
 ## Practical Next Step
 
@@ -351,7 +362,7 @@ Short term:
 
 - keep `package-manifest.txt` as the compatibility manifest
 - publish packages through GitHub Releases
-- port the Python patch contract into a testable patch-core
+- port the Python patch contract into YAL's testable patch-core
 - add dry-run, install, repair, uninstall and diagnostics around that core
 
 Medium term:
@@ -359,4 +370,5 @@ Medium term:
 - add a JSON manifest beside `package-manifest.txt`
 - add per-aircraft install-state metadata
 - add multi-generation backups
-- use the same installer shell for both LevelUp and Zibo VNAV table packages
+- keep YAL's Zibo package support parallel to the separate LevelUp standalone
+  installer
