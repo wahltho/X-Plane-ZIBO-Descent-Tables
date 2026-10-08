@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "packageId": "x-plane-zibo-vnav-descent-tables",
+    "displayName": "VNAV descent tables",
+    "repositoryUrl": "https://github.com/wahltho/X-Plane-ZIBO-Descent-Tables",
+    "supportedProducts": [
+      "zibo-737ng"
+    ],
+    "moduleIds": [
+      "vnav"
+    ],
+    "targetPaths": [
+      "plugins/xlua/scripts/B738.a_fms/Add_dofile.txt",
+      "plugins/xlua/scripts/B738.a_fms/Add_to_take_alt_dist.txt",
+      "plugins/xlua/scripts/B738.a_fms/Add_to_take_alt_dist_mach.txt",
+      "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua",
+      "plugins/xlua/scripts/B738.a_fms/B738.a_fms_zibo_tables.lua"
+    ],
+    "standaloneEvidencePaths": [
+      ".patch-ownership/x-plane-zibo-vnav-descent-tables/receipt.json",
+      ".patch-ownership/x-plane-zibo-vnav-descent-tables.lock",
+      ".patch-ownership/x-plane-zibo-vnav-descent-tables/transaction"
+    ],
+    "payloadPaths": [
+      "plugins/xlua/scripts/B738.a_fms/Add_dofile.txt",
+      "plugins/xlua/scripts/B738.a_fms/Add_to_take_alt_dist.txt",
+      "plugins/xlua/scripts/B738.a_fms/Add_to_take_alt_dist_mach.txt",
+      "plugins/xlua/scripts/B738.a_fms/B738.a_fms_zibo_tables.lua"
+    ],
+    "markerNamespaces": [
+      {
+        "relativePath": "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua",
+        "namespace": "ZIBO_VNAV_DESCENT_TABLES",
+        "blocks": [
+          {
+            "beginMarker": "-- BEGIN ZIBO_VNAV_DESCENT_TABLES DOFILE",
+            "endMarker": "-- END ZIBO_VNAV_DESCENT_TABLES DOFILE"
+          },
+          {
+            "beginMarker": "-- BEGIN ZIBO_VNAV_DESCENT_TABLES KIAS",
+            "endMarker": "-- END ZIBO_VNAV_DESCENT_TABLES KIAS"
+          },
+          {
+            "beginMarker": "-- BEGIN ZIBO_VNAV_DESCENT_TABLES MACH",
+            "endMarker": "-- END ZIBO_VNAV_DESCENT_TABLES MACH"
+          }
+        ],
+        "allowedCommentLines": []
+      }
+    ],
+    "signatures": [
+      {
+        "relativePath": "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua",
+        "text": "dofile(\"B738.a_fms_zibo_tables.lua\")"
+      }
+    ],
+    "resultFiles": [],
+    "originalFiles": [],
+    "recoveryInstruction": "Before switching to MTK, use the restore or uninstall procedure documented by this patch, preserving other patches. Then rescan. Instructions: https://github.com/wahltho/X-Plane-ZIBO-Descent-Tables#readme."
+  }
+}

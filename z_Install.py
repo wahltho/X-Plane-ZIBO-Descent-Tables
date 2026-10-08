@@ -9,9 +9,11 @@ external diff tools and avoids Python text-mode newline conversion.
 
 from __future__ import annotations
 
+import argparse
 import shutil
+from standalone_guard import Guard, OwnershipError, safe, verify_text_manifest
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 LUA_FILE = Path("B738.a_fms.lua")
@@ -79,7 +81,7 @@ def has_non_commented_line(lines: list[str], search_text: str) -> bool:
 
 def require_file(path: Path) -> None:
     if not path.exists():
-        print(f"ERROR: {path} not found. Run this script from the B738.a_fms script folder.", file=sys.stderr)
+        print(f"ERROR: {path} not found. Extract the complete package to a separate folder.", file=sys.stderr)
         raise SystemExit(2)
 
 
@@ -198,63 +200,55 @@ def schedule_dofile_update(
 
 
 def main() -> int:
-    for path in (LUA_FILE, TABLE_FILE, DOFILE_FRAGMENT, TABLE_FILE_ALT_DIST, TABLE_FILE_ALT_DIST_MACH):
-        require_file(path)
-
-    original_data = LUA_FILE.read_bytes()
-    lua_lines, eol, has_final_eol = split_lines(original_data)
-    dofile_content = read_logical_lines(DOFILE_FRAGMENT)
-    alt_dist_content = read_logical_lines(TABLE_FILE_ALT_DIST)
-    alt_dist_mach_content = read_logical_lines(TABLE_FILE_ALT_DIST_MACH)
-
-    insertions: list[tuple[int, list[str]]] = []
-    replacements: list[tuple[int, int, list[str]]] = []
-
-    schedule_dofile_update(lua_lines, insertions, replacements, dofile_content)
-    schedule_block_update(
-        lua_lines,
-        insertions,
-        replacements,
-        ALT_DIST_BEGIN,
-        ALT_DIST_END,
-        ALT_DIST_MARKER,
-        ALT_DIST_FUNC,
-        alt_dist_content,
-        "take_alt_dist hook",
-    )
-    schedule_block_update(
-        lua_lines,
-        insertions,
-        replacements,
-        ALT_DIST_MACH_BEGIN,
-        ALT_DIST_MACH_END,
-        ALT_DIST_MACH_MARKER,
-        ALT_DIST_MACH_FUNC,
-        alt_dist_mach_content,
-        "take_alt_dist_mach hook",
-    )
-
-    if not insertions and not replacements:
-        print("Already installed; no changes made.")
-        return 0
-
-    if not BACKUP_FILE.exists():
-        shutil.copy2(LUA_FILE, BACKUP_FILE)
-        print(f"Backup created: {BACKUP_FILE}")
-    else:
-        print(f"Backup already exists, not overwritten: {BACKUP_FILE}")
-
-    for start, end_exclusive, content in sorted(replacements, key=lambda item: item[0], reverse=True):
-        lua_lines[start:end_exclusive] = content
-
-    for insert_at, content in sorted(insertions, key=lambda item: item[0], reverse=True):
-        lua_lines[insert_at:insert_at] = content
-
-    write_lines_preserving_eol(LUA_FILE, lua_lines, eol, has_final_eol)
-    print(f"Installed or updated {len(insertions) + len(replacements)} hook block(s) in {LUA_FILE}.")
-
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--aircraft-root", type=Path, help="Aircraft root; run from the extracted package")
+    parser.add_argument("--uninstall", action="store_true")
+    args = parser.parse_args()
+    package = Path(__file__).resolve().parent
+    cwd = Path.cwd().resolve()
+    aircraft = args.aircraft_root or (cwd.parents[3] if cwd.name == "B738.a_fms" else cwd)
+    relative = "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua"
+    with Guard(aircraft, package) as guard:
+        version = verify_text_manifest(package, guard.package_id)
+        target = safe(guard.root, relative)
+        original = target.read_bytes()
+        lua_lines, eol, final_eol = split_lines(original)
+        insertions = []
+        replacements = []
+        if args.uninstall:
+            for begin, end in ((DOFILE_BEGIN, DOFILE_END), (ALT_DIST_BEGIN, ALT_DIST_END),
+                               (ALT_DIST_MACH_BEGIN, ALT_DIST_MACH_END)):
+                block = find_marked_block(lua_lines, begin, end)
+                if block is None:
+                    raise OwnershipError("Installed VNAV block is missing: " + begin)
+                replacements.append((block[0], block[1], []))
+        else:
+            for file in (TABLE_FILE, DOFILE_FRAGMENT, TABLE_FILE_ALT_DIST, TABLE_FILE_ALT_DIST_MACH):
+                require_file(package / file)
+            schedule_dofile_update(lua_lines, insertions, replacements, read_logical_lines(package / DOFILE_FRAGMENT))
+            schedule_block_update(lua_lines, insertions, replacements, ALT_DIST_BEGIN, ALT_DIST_END,
+                                  ALT_DIST_MARKER, ALT_DIST_FUNC, read_logical_lines(package / TABLE_FILE_ALT_DIST),
+                                  "take_alt_dist hook")
+            schedule_block_update(lua_lines, insertions, replacements, ALT_DIST_MACH_BEGIN, ALT_DIST_MACH_END,
+                                  ALT_DIST_MACH_MARKER, ALT_DIST_MACH_FUNC,
+                                  read_logical_lines(package / TABLE_FILE_ALT_DIST_MACH), "take_alt_dist_mach hook")
+        for first, last, content in sorted(replacements, reverse=True):
+            lua_lines[first:last] = content
+        for index, content in sorted(insertions, reverse=True):
+            lua_lines[index:index] = content
+        modified = eol.join(lua_lines) + (eol if final_eol else "")
+        table_relative = str(PurePosixPath(relative).parent / TABLE_FILE.name)
+        plan = {relative: modified.encode("utf-8"),
+                table_relative: guard.original_payload(table_relative) if args.uninstall
+                                else (package / TABLE_FILE).read_bytes()}
+        guard.apply(plan, uninstall=args.uninstall, version=version)
+    print("VNAV removed." if args.uninstall else "VNAV installed and verified. Restart X-Plane.")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, KeyError) as error:
+        print("ERROR: " + str(error), file=sys.stderr)
+        raise SystemExit(1)

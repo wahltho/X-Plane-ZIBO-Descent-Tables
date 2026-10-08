@@ -24,6 +24,8 @@ jobs:
           zip -X -j dist/zibo-vnav-descent-installer.zip \
             README.md \
             z_Install.py \
+            standalone_guard.py \
+            standalone-ownership.json \
             package-manifest.txt \
             B738.a_fms_zibo_tables.lua \
             Add_dofile.txt \

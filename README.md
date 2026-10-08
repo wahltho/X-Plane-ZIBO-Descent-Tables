@@ -60,46 +60,37 @@ This repository contains:
 ## Requirements
 
 - Zibo 737-800X for X-Plane 12.
-- Python 3 is recommended for automated installation.
+- Python 3.10 or newer for the standalone installer.
 
 ## Installation
 
-1. Download the repository files from GitHub, or download the release ZIP if one
-   is available.
+Close X-Plane and extract the complete package to a separate folder outside
+Zibo's aircraft directory. Do not copy the runtime files into the aircraft first.
+From the extracted package, run:
 
-2. Move these files into the Zibo `plugins/xlua/scripts/B738.a_fms` folder:
+```text
+python3 z_Install.py --aircraft-root "/path/to/Zibo aircraft"
+```
 
-   - `B738.a_fms_zibo_tables.lua`
-   - `Add_dofile.txt`
-   - `Add_to_take_alt_dist.txt`
-   - `Add_to_take_alt_dist_mach.txt`
-   - `package-manifest.txt`
-   - `z_Install.py`
+On Windows, use `py -3` instead of `python3`. Python 3.10 or newer is required.
+The installer backs up the original script and table file, writes its own receipt,
+and adds the same marked VNAV hooks as before. Run the same command to update or
+verify an installation made by this installer.
 
-3. From a terminal or console in the `B738.a_fms` folder, run:
+To remove it, close X-Plane and run:
 
-   ```bash
-   python3 z_Install.py
-   ```
+```text
+python3 z_Install.py --aircraft-root "/path/to/Zibo aircraft" --uninstall
+```
 
-   On Windows, use `py z_Install.py` or `python z_Install.py` if `python3` is
-   not available.
-
-4. The installer creates `B738.a_fms.backup` if no backup exists yet, inserts
-   the marked `dofile` fragment from `Add_dofile.txt` below:
-
-   ```lua
-   jit.off()
-   ```
-
-   and adds the two marked VNAV descent hook blocks below:
-
-   - `function take_alt_dist(x_idx_alt, x_spd_alt, x_spd_wnd_alt, x_flap)`
-   - `function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)`
+Removal uses the recorded originals for the table file and removes only the VNAV
+blocks from the shared Lua script. Other patches and unrelated edits are retained.
 
 ## Manual Installation
 
-Manual editing is only the fallback if Python is not available. Make a backup of
+Manual edits have no installer receipt and cannot be adopted by MTK or the
+standalone installer. Keep the original backup and undo those edits before
+switching installation methods. Make a backup of
 `B738.a_fms.lua` before you begin.
 
 1. Add all lines from `Add_dofile.txt` directly below `jit.off()`.
@@ -141,14 +132,9 @@ The manifest does not bind the package to a hash of the complete upstream
 `B738.a_fms.lua`, because that file can legitimately change with aircraft
 updates.
 
-The installer also migrates unmarked `v0.1.0` installations:
-
-- a bare `dofile("B738.a_fms_zibo_tables.lua")` line is replaced by the marked
-  dofile block;
-- the old unmarked KIAS hook is replaced by the marked KIAS block;
-- the old unmarked Mach hook is replaced by the marked Mach block.
-
-The migration is designed to avoid duplicate hooks.
+Legacy signatures remain documented so older patches can be identified. The
+new installer does not adopt an unmarked or manually patched installation.
+Restore it with the original installer and backups before installing again.
 
 ## Troubleshooting
 
@@ -162,3 +148,26 @@ If the custom behavior does not appear to activate:
 
 If the custom calculation cannot be used for a specific situation, the hook
 returns `nil` and the original Lua calculation continues.
+
+## Installation ownership
+
+MTK and the standalone installer remain separate supported installation methods.
+Use the same owner for updates and removal. To switch, uninstall through the
+current owner first, then install through the other. Neither installer adopts
+already patched files on the strength of matching hashes alone.
+
+Keep the complete extracted package, including `standalone_guard.py` and
+`standalone-ownership.json`. The standalone installer checks its recorded
+original backups and stops if MTK owns this patch or a shared target file.
+Unknown, duplicate or incomplete patch blocks and unowned companion files also
+block the operation. Other correctly installed patches are preserved.
+
+A failed operation restores the bytes it changed. If the process is interrupted,
+keep the `.patch-ownership` receipt, transaction journal and lock, together with
+any older patch backup/state directory. Do not delete them to retry. Ask for
+support before changing those files.
+
+Older standalone installs without a complete receipt are not automatically
+migrated. Remove them using the installer and original backups that created
+them. This source change affects installation checks only; runtime payloads and
+patch versions are unchanged. Installer and recovery tests cover these checks.
